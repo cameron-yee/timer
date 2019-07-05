@@ -3,13 +3,15 @@
 #include <unistd.h>
 #include <string.h>
 #include <ncurses.h>
-//#include <math.h>
 
 typedef struct Tea {
     char *key;
     int minutes;
     int seconds;
 } tea;
+
+void init_tea(tea teas[], char *key, int minutes, int seconds, size_t position); 
+void start_timer(int time_in_seconds, size_t max_unit, int is_tea);
 
 void init_tea(tea teas[], char *key, int minutes, int seconds, size_t position) {
     teas[position].key = key;
@@ -18,7 +20,7 @@ void init_tea(tea teas[], char *key, int minutes, int seconds, size_t position) 
 }
 
 //Max unit: 3 for hour, 2 for minute, 1 for second
-void start_timer(int time_in_seconds, size_t max_unit) {
+void start_timer(int time_in_seconds, size_t max_unit, int is_tea) {
     int row, col;
 
     initscr();
@@ -28,29 +30,37 @@ void start_timer(int time_in_seconds, size_t max_unit) {
     getmaxyx(stdscr, row, col); //Gets window width and height and stores it in row and col vars
 
     for (int i = time_in_seconds; i >= 0; i--) {
-         if (max_unit == 3) {
-            refresh();
+        refresh();
+
+        if (max_unit == 3) {
             mvprintw(row/2, (col-4)/2, "%d:%d:%d", i/3600, i%3600/60, i%3600%60);
-            sleep(1);
         } else if (max_unit == 2) {
-            refresh();
             mvprintw(row/2, (col-2)/2, "%d:%d", i/60, i%60);
-            sleep(1);
         } else if (max_unit == 1) {
-            refresh();
             mvprintw(row/2, (col-1)/2, "%d", i);
-            sleep(1);
         }
+
+        sleep(1);
     }
 
     refresh();
-    mvprintw(row/2, (col-9)/2, "%s\n",  "Your tea is ready.");
+    if (is_tea == 0) {
+        mvprintw(row/2, (col-5)/2, "%s\n",  "Time is up.");
+    } else {
+        mvprintw(row/2, (col-9)/2, "%s\n",  "Your tea is ready.");
+    }
+
+    mvprintw(row/2 + 2, (col-11)/2, "%s\n",  "Press any key to exit");
+
+    for (size_t j = 5; j > 0; j--) {
+        beep();
+        flash();
+        sleep(1);
+    }
 
     getch();
 
     endwin();
-
-    exit(0);
 }
 
 
@@ -98,7 +108,7 @@ int main(int argc, char* argv[]) {
                     seconds = teas[i].seconds;
                     time_in_seconds = (minutes * 60) + seconds;
 
-                    start_timer(time_in_seconds, 2);
+                    start_timer(time_in_seconds, 2, 1);
                 }
             }
 
@@ -109,7 +119,7 @@ int main(int argc, char* argv[]) {
         minutes = 0;
         hours = 0;
 
-        start_timer(seconds, 1);
+        start_timer(seconds, 1, 0);
     }
 
 
@@ -120,7 +130,7 @@ int main(int argc, char* argv[]) {
 
         time_in_seconds = (minutes * 60) + seconds;
 
-        start_timer(time_in_seconds, 2);
+        start_timer(time_in_seconds, 2, 0);
     }
 
     if (argc == 4) {
@@ -130,7 +140,7 @@ int main(int argc, char* argv[]) {
 
         time_in_seconds = (hours * 3600) + (minutes * 60) + seconds;
 
-        start_timer(time_in_seconds, 3);
+        start_timer(time_in_seconds, 3, 0);
     }
 
     return 0;
