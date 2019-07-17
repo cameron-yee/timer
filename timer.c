@@ -4,6 +4,9 @@
 #include <string.h>
 #include <ncurses.h>
 
+//Global module variables
+int row, col;
+
 typedef struct Tea {
     char *key;
     int minutes;
@@ -19,9 +22,17 @@ void init_tea(tea teas[], char *key, int minutes, int seconds, size_t position) 
     teas[position].seconds = seconds;
 }
 
+void resize() {
+    erase();
+    endwin();
+    refresh();
+    getmaxyx(stdscr, row, col); //Gets window width and height and stores it in row and col vars
+}
+
+
 //Max unit: 3 for hour, 2 for minute, 1 for second
 void start_timer(int time_in_seconds, size_t max_unit, int is_tea) {
-    int row, col;
+    signal(SIGWINCH, resize);
 
     initscr();
     curs_set(0); //hides cursor
@@ -33,11 +44,11 @@ void start_timer(int time_in_seconds, size_t max_unit, int is_tea) {
         refresh();
 
         if (max_unit == 3) {
-            mvprintw(row/2, (col-4)/2, "%d:%d:%d", i/3600, i%3600/60, i%3600%60);
+            mvprintw(row/2, (col-4)/2, "%02d:%02d:%02d", i/3600, i%3600/60, i%3600%60);
         } else if (max_unit == 2) {
-            mvprintw(row/2, (col-2)/2, "%d:%d", i/60, i%60);
+            mvprintw(row/2, (col-2)/2, "%02d:%02d", i/60, i%60);
         } else if (max_unit == 1) {
-            mvprintw(row/2, (col-1)/2, "%d", i);
+            mvprintw(row/2, (col-1)/2, "%02d", i);
         }
 
         sleep(1);
@@ -61,6 +72,8 @@ void start_timer(int time_in_seconds, size_t max_unit, int is_tea) {
     getch();
 
     endwin();
+
+    exit(0);
 }
 
 
