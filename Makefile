@@ -1,4 +1,4 @@
 CC=gcc
 
-make: timer.c
-	$(CC) -lncurses timer.c -o timer
+make: main.c
+	$(CC) -lncurses timer.c stopwatch.c main.c -o timer
