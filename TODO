@@ -1,3 +1,3 @@
 1. Add stopwatch option with log for what the stopwatch is for
-2. Remove [] syntax for static strings
+    * Create config file with path of log file to write to
 3. Refactor teas to linked list? Maybe?

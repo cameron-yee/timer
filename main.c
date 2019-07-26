@@ -16,7 +16,24 @@ int main(int argc, char* argv[]) {
     char *tea_type;
 
     if (!strcmp(argv[1], "stopwatch")) {
-        stopwatch_start();
+        if (argc == 5) {
+            hours = atoi(argv[2]);
+            minutes = atoi(argv[3]);
+            seconds = atoi(argv[4]);
+            time_in_seconds = (hours * 3600) + (minutes * 60) + seconds;
+            stopwatch_start(time_in_seconds);
+        } else if (argc == 4) {
+            minutes = atoi(argv[2]);
+            seconds = atoi(argv[3]);
+            time_in_seconds = (minutes * 60) + seconds;
+            stopwatch_start(time_in_seconds);
+        } else if (argc == 3) {
+            seconds = atoi(argv[2]);
+            time_in_seconds = seconds;
+            stopwatch_start(time_in_seconds);
+        } else {
+            stopwatch_start(0);
+        }
     }
 
     if (argc > 4) {
@@ -38,10 +55,10 @@ int main(int argc, char* argv[]) {
             tea_type = argv[1];
             printf("%s", tea_type);
 
-            char gs[] = "green";
-            char bs[] = "black";
-            char gl[] = "greenlong";
-            char bl[] = "blacklong";
+            char *gs = "green";
+            char *bs = "black";
+            char *gl = "greenlong";
+            char *bl = "blacklong";
 
             timer_init_tea(teas, gs, 1, 30, 0);
             timer_init_tea(teas, bs, 3, 0, 1);

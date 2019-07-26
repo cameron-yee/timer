@@ -8,6 +8,6 @@
 #define STOPWATCH_H
 
 void stopwatch_resize();
-void stopwatch_start();
+void stopwatch_start(int time_in_seconds);
 
 #endif

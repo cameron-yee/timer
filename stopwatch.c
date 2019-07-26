@@ -15,10 +15,10 @@ void stopwatch_resize() {
     getmaxyx(stdscr, row, col); //Gets window width and height and stores it in row and col vars
 }
 
-void stopwatch_start() {
-    signal(SIGWINCH, stopwatch_resize);
-
+void stopwatch_start(int time_in_seconds) {
     size_t hours, minutes, seconds;
+
+    signal(SIGWINCH, stopwatch_resize);
 
     initscr();
     curs_set(0); //hides cursor
@@ -59,6 +59,32 @@ void stopwatch_start() {
         } else {
             mvprintw(row/2, (col-1)/2, "%02d", seconds);
             //mvprintw(row/2 + 1, (col-8)/2, "Press 'x' to exit");
+        }
+
+        //after ++seconds so if time_in_seconds == 0 this will never hit
+        if (time_in_seconds == (hours * 3600) + (minutes * 60) + seconds) {
+            for (size_t j = 5; j > 0; j--) {
+                beep();
+                flash();
+
+                if (j != 1) {
+                    sleep(1);
+                }
+
+                ++seconds;
+
+                if (seconds == 60) {
+                    seconds = 0;
+                    ++minutes;
+                }
+
+                if (minutes == 60) {
+                    minutes = 0;
+                    ++hours;
+                }
+            }
+
+            //seconds += 4; //To compensate for j = 5
         }
 
         sleep(1);
