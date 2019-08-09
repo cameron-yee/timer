@@ -17,25 +17,45 @@ void stopwatch_resize() {
 
 void stopwatch_start(int time_in_seconds) {
     size_t hours, minutes, seconds;
+    int paused;
+
+    paused = 0;
 
     signal(SIGWINCH, stopwatch_resize);
 
     initscr();
     curs_set(0); //hides cursor
     noecho(); //prevents user input from printing to the screen
+    cbreak();
 
     getmaxyx(stdscr, row, col); //Gets window width and height and stores it in row and col vars
 
-    hours = 0;
-    minutes = 0;
-    seconds = 0;
+    hours = time_in_seconds / 3600;
+    minutes = (time_in_seconds / 60) % 60;
+    seconds = time_in_seconds % 60;
 
-    //TODO: bad practice to save getch() as char, should be int
-    // I need to figure out what x would be as an int
-    //char ch;
-    //while((ch = getch()) != 'x') {
     while (hours < 24) {
+        timeout(1000); //delay in milliseconds for getch
         ++seconds;
+
+        int input = getch(); //replaces sleep(1) because it blocks for 1 second
+
+        if (input != -1 && paused == 0) {
+            paused = 1;
+            refresh();
+            if (hours != 0 || minutes != 0) {
+                mvprintw(row/2 - 1, (col-2)/2, "PAUSED");
+            } else {
+                mvprintw(row/2 - 1, (col-5)/2, "PAUSED");
+            }
+            timeout(10000000000000);
+            getch();
+            paused = 0;
+            erase();
+        } else if (input != -1 && paused == 1) {
+            paused = 0;
+            erase();
+        }
 
         if (seconds == 60) {
             seconds = 0;
@@ -52,42 +72,39 @@ void stopwatch_start(int time_in_seconds) {
 
         if (hours != 0) {
             mvprintw(row/2, (col-4)/2, "%02d:%02d:%02d", hours, minutes, seconds);
-            //mvprintw(row/2 + 1, (col-8)/2, "Press 'x' to exit");
         } else if (minutes != 0) {
             mvprintw(row/2, (col-2)/2, "%02d:%02d", minutes, seconds);
-            //mvprintw(row/2 + 1, (col-8)/2, "Press 'x' to exit");
         } else {
             mvprintw(row/2, (col-1)/2, "%02d", seconds);
-            //mvprintw(row/2 + 1, (col-8)/2, "Press 'x' to exit");
         }
 
         //after ++seconds so if time_in_seconds == 0 this will never hit
-        if (time_in_seconds == (hours * 3600) + (minutes * 60) + seconds) {
-            for (size_t j = 5; j > 0; j--) {
-                beep();
-                flash();
+        //if (time_in_seconds == (hours * 3600) + (minutes * 60) + seconds) {
+        //    for (size_t j = 5; j > 0; j--) {
+        //        beep();
+        //        flash();
 
-                if (j != 1) {
-                    sleep(1);
-                }
+        //        if (j != 1) {
+        //            sleep(1);
+        //        }
 
-                ++seconds;
+        //        ++seconds;
 
-                if (seconds == 60) {
-                    seconds = 0;
-                    ++minutes;
-                }
+        //        if (seconds == 60) {
+        //            seconds = 0;
+        //            ++minutes;
+        //        }
 
-                if (minutes == 60) {
-                    minutes = 0;
-                    ++hours;
-                }
-            }
+        //        if (minutes == 60) {
+        //            minutes = 0;
+        //            ++hours;
+        //        }
+        //    }
 
-            //seconds += 4; //To compensate for j = 5
-        }
+        //    //seconds += 4; //To compensate for j = 5
+        //}
 
-        sleep(1);
+        //sleep(1);
     }
 
     //TODO: add logging
