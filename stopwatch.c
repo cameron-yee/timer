@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <ncurses.h>
 #include "stopwatch.h"
 
 //Global module variables
 int row, col;
+size_t hours, minutes, seconds;
 
 void stopwatch_resize() {
     erase();
@@ -15,13 +17,32 @@ void stopwatch_resize() {
     getmaxyx(stdscr, row, col); //Gets window width and height and stores it in row and col vars
 }
 
+void stopwatch_log() {
+    FILE *log;
+    time_t t; 
+
+    t = time(NULL);
+    struct tm time = *localtime(&t);
+
+    endwin();
+    printf("%lu hours, %lu minutes, %lu seconds\n", hours, minutes, seconds);
+    fflush(stdout);
+
+    log = fopen("log.txt", "a+");
+    fprintf(log, "%lu hours, %lu minutes, %lu seconds | %d/%d/%d %d:%d:%d\n", hours, minutes, seconds, time.tm_mon + 1, time.tm_mday, time.tm_year + 1900, time.tm_hour, time.tm_min, time.tm_sec);
+    fclose(log);
+
+    exit(0);
+}
+
 void stopwatch_start(int time_in_seconds) {
-    size_t hours, minutes, seconds;
+    //size_t hours, minutes, seconds;
     int paused;
 
     paused = 0;
 
     signal(SIGWINCH, stopwatch_resize);
+    signal(SIGINT, stopwatch_log);
 
     initscr();
     curs_set(0); //hides cursor
