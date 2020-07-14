@@ -9,6 +9,7 @@
 //Global module variables
 int row, col;
 size_t hours, minutes, seconds;
+struct tm start_time;
 
 void stopwatch_resize() {
     erase();
@@ -25,10 +26,11 @@ void stopwatch_log() {
     struct tm time = *localtime(&t);
 
     endwin();
-    printf("%lu hours, %lu minutes, %lu seconds\n", hours, minutes, seconds);
+    printf("Logged time: %lu hours, %lu minutes, %lu seconds\n", hours, minutes, seconds);
+    printf("Start time: %d:%d:%d\n", time.tm_hour, time.tm_min, time.tm_sec);
     fflush(stdout);
 
-    log = fopen("log.txt", "a+");
+    log = fopen("/Users/cyee/Documents/practice/c/timer/log.txt", "a+");
     fprintf(log, "%lu hours, %lu minutes, %lu seconds | %d/%d/%d %d:%d:%d\n", hours, minutes, seconds, time.tm_mon + 1, time.tm_mday, time.tm_year + 1900, time.tm_hour, time.tm_min, time.tm_sec);
     fclose(log);
 
@@ -38,7 +40,9 @@ void stopwatch_log() {
 void stopwatch_start(int time_in_seconds) {
     //size_t hours, minutes, seconds;
     int paused;
+    time_t t;
 
+    start_time = *localtime(&t);
     paused = 0;
 
     signal(SIGWINCH, stopwatch_resize);
@@ -87,7 +91,6 @@ void stopwatch_start(int time_in_seconds) {
             minutes = 0;
             ++hours;
         }
-
 
         refresh();
 
